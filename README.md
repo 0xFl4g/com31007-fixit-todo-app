@@ -40,11 +40,11 @@ group.project.fixitapp/
 
 | Component | Version |
 |-----------|---------|
-| Kotlin | 1.9.21 |
-| Jetpack Compose BOM | 2024.02.00 |
-| Room | 2.6.1 |
-| Navigation Compose | 2.7.7 |
-| Lifecycle / ViewModel | 2.7.0 |
+| Kotlin | 2.1.10 |
+| Jetpack Compose BOM | 2025.01.01 |
+| Room | 2.7.1 |
+| Navigation Compose | 2.8.9 |
+| Lifecycle / ViewModel | 2.8.7 |
 | Material 3 | Latest via BOM |
 | Min SDK | 30 (Android 11) |
 | Target SDK | 35 (Android 15) |
@@ -53,7 +53,7 @@ group.project.fixitapp/
 
 ### Prerequisites
 
-- Android Studio Iguana (2023.2.1) or later
+- Android Studio Ladybug (2024.2.1) or later
 - JDK 21
 - Android SDK 35
 
