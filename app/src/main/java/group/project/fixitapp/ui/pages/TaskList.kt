@@ -1,7 +1,5 @@
 package group.project.fixitapp.ui.pages
 
-
-import android.annotation.SuppressLint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,7 +22,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -47,15 +45,14 @@ sealed class TaskLoadCriteria {
     data class ListId(val id: Int) : TaskLoadCriteria()
 }
 
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun TaskListScreen(
     viewModel: TaskListViewModel,
     criteria: TaskLoadCriteria,
     navController: NavController
 ) {
+    val listNameState by viewModel.listName.collectAsState()
     var listName = "Default"
-    // Assuming you have some criteria enum or type to determine what to load
     when (criteria) {
         is TaskLoadCriteria.MyDay -> {
             listName = "My Day"
@@ -69,7 +66,7 @@ fun TaskListScreen(
 
         is TaskLoadCriteria.ListId -> {
             viewModel.loadListName(criteria.id)
-            listName = viewModel.listName.value
+            listName = listNameState
             viewModel.loadTasksByListId(criteria.id)
         }
     }
@@ -79,7 +76,6 @@ fun TaskListScreen(
     val sortedIfCompletedTasks = tasks.sortedBy { it.completedAt != null }
 
     val showDialog = remember { mutableStateOf(false) }
-    val selectedSortOrder = remember { mutableStateOf(viewModel.sortOrder.value) }
 
     Scaffold(
         topBar = {
@@ -88,10 +84,8 @@ fun TaskListScreen(
                 title = { Text("Tasks", color = colorScheme.onPrimary) },
                 actions = {
                     IconButton(onClick = { showDialog.value = true }) {
-                        //navController.navigate(Destinations.TASK_LIST_SPECIFIC_ID_ROUTE.replace("{listId}", list.id.toString()))
-
                         Icon(
-                            Icons.Default.List,
+                            Icons.AutoMirrored.Filled.List,
                             contentDescription = "Sort",
                             tint = colorScheme.onPrimary
                         )

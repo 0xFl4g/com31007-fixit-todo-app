@@ -50,29 +50,6 @@ private val LightColorScheme = lightColorScheme(
     // ... additional colors as needed
 )
 
-
-//private val DarkColorScheme = darkColorScheme(
-//    primary = Purple80,
-//    secondary = PurpleGrey80,
-//    tertiary = Pink80
-//)
-//
-//private val LightColorScheme = lightColorScheme(
-//    primary = Purple40,
-//    secondary = PurpleGrey40,
-//    tertiary = Pink40
-//
-//    /* Other default colors to override
-//    background = Color(0xFFFFFBFE),
-//    surface = Color(0xFFFFFBFE),
-//    onPrimary = Color.White,
-//    onSecondary = Color.White,
-//    onTertiary = Color.White,
-//    onBackground = Color(0xFF1C1B1F),
-//    onSurface = Color(0xFF1C1B1F),
-//    */
-//)
-
 @Composable
 private fun getCurrentColorScheme(darkTheme: Boolean, dynamicColor: Boolean): ColorScheme {
     val context = LocalContext.current
@@ -96,6 +73,7 @@ fun FixItAppTheme(
     MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
 }
 
+@Suppress("DEPRECATION")
 @Composable
 private fun ApplySystemBarsColor(colorScheme: ColorScheme, darkTheme: Boolean) {
     val view = LocalView.current

@@ -21,7 +21,7 @@ import java.time.LocalDateTime
 
 @Database(
     entities = [ListEntity::class, TaskEntity::class, TemplateEntity::class, SettingEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -41,7 +41,8 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "app_database"
-                ).apply {
+                ).fallbackToDestructiveMigration()
+                 .apply {
                     if (populate) {
                         addCallback(roomCallback)
                     }

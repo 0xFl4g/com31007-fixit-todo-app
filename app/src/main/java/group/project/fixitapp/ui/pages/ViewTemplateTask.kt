@@ -75,22 +75,6 @@ fun ViewTemplateTaskContent(
 
         Spacer(modifier = Modifier.height(MediumPadding))
 
-        /* Text(
-            text = buildAnnotatedString {
-                withStyle(
-                    style = SpanStyle(
-                        color = colorScheme.secondary,
-                        fontWeight = FontWeight.Bold
-                    )
-                ) {
-                    append("Title: ")
-                }
-                append(" ${templateTask?.title ?: "No title"}")
-            },
-            modifier = Modifier.padding(SmallPadding)
-        )
-        */
-
         Text(
             text = buildAnnotatedString {
                 withStyle(

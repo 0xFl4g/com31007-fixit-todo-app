@@ -81,7 +81,6 @@ fun AppBottomNavigation(navController: NavController, viewModel: HomeViewModel) 
             onDismissRequest = {
                 showDialog = false
             },
-            //title = { Text("Create a new:") },
             text = {
                 Column {
 
@@ -112,7 +111,6 @@ fun AppBottomNavigation(navController: NavController, viewModel: HomeViewModel) 
 
                     Spacer(modifier = Modifier.height(MediumPadding))
 
-                    //Create a New List
                     Row(
                         modifier = Modifier
                             .background(
@@ -140,7 +138,6 @@ fun AppBottomNavigation(navController: NavController, viewModel: HomeViewModel) 
 
                     Spacer(modifier = Modifier.height(MediumPadding))
 
-                    //Create a New Task from Template
                     Row(
                         modifier = Modifier
                             .background(

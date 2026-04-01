@@ -3,6 +3,7 @@ package group.project.fixitapp.data.entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import group.project.fixitapp.data.Converters
@@ -17,7 +18,8 @@ import java.time.LocalDateTime
             childColumns = arrayOf("list_id"),
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [Index("list_id")]
 )
 @TypeConverters(Converters::class)
 data class TaskEntity(

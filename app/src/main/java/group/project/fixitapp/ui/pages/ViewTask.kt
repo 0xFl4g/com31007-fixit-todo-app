@@ -21,7 +21,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -121,7 +121,7 @@ fun ViewTaskContent(
 
         Spacer(modifier = Modifier.height(SmallPadding))
 
-        //Reminder DateTIme
+        // Reminder DateTime
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -234,7 +234,7 @@ fun ViewTaskContent(
             )
         }
 
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = MediumPadding, bottom = MediumPadding)
@@ -335,7 +335,7 @@ fun ViewTaskContent(
             )
         }
 
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = MediumPadding, bottom = MediumPadding)
@@ -519,12 +519,9 @@ fun ViewTaskContent(
                 }
             }
 
-            // Delete button
             Column {
-                // Button
                 Button(
                     onClick = {
-                        //call function that can delete task
                         deletionAlert = true
                     },
                     modifier = Modifier

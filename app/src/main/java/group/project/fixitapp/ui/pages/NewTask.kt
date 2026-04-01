@@ -80,9 +80,9 @@ fun NewTaskContent(
     navController: NavController,
     paddingValues: PaddingValues
 ) {
-
     Column(
         modifier = Modifier
+            .padding(paddingValues)
             .padding(MediumPadding)
             .verticalScroll(rememberScrollState())
     ) {

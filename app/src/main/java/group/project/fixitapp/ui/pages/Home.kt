@@ -28,7 +28,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -102,7 +102,7 @@ fun HomeContent(modifier: Modifier, viewModel: HomeViewModel, navController: Nav
             "My Day"
         ) { navController.navigate(Destinations.TASK_LIST_MY_DAY_ROUTE) }
         ListItem(
-            Icons.Default.List,
+            Icons.AutoMirrored.Filled.List,
             "Unlisted"
         ) { navController.navigate(Destinations.TASK_LIST_UNLISTED_ROUTE) }
 
@@ -167,14 +167,13 @@ fun UserListsSection(userLists: List<ListEntity>, navController: NavController) 
                 items(userLists) { list ->
                     Row {
                         Column {
-                            ListItem(Icons.Default.List, list.name) {
+                            ListItem(Icons.AutoMirrored.Filled.List, list.name) {
                                 navController.navigate(
                                     Destinations.TASK_LIST_SPECIFIC_ID_ROUTE.replace(
                                         "{listId}",
                                         list.id.toString()
                                     )
                                 )
-                                //Destinations.TASK_LIST_SPECIFIC_ID_ROUTE.let { homeViewModel.editListName(it, newName) }
                             }
                         }
 
@@ -282,7 +281,6 @@ fun UserListsSection(userLists: List<ListEntity>, navController: NavController) 
                                             showDelete = false
                                             homeViewModel.deleteListWithoutUnlisted(currentListId)
                                             navController.navigate(Destinations.HOME_ROUTE)
-//                                    showDelete = false
                                         },
                                         colors = ButtonDefaults.buttonColors(
                                             backgroundColor = colorScheme.error,
@@ -335,7 +333,6 @@ fun UserListsSection(userLists: List<ListEntity>, navController: NavController) 
                             title = { Text("Sort lists by") },
                             text = {
                                 Column {
-                                    //homeViewModel.changeSortOrder(HomeViewModel.ListSortOrder.Name)
                                     HomeViewModel.ListSortOrder.values().forEach { order ->
                                         Text(
                                             text = order.name,

@@ -73,11 +73,11 @@ class MainActivity : ComponentActivity() {
         locationManager.removeUpdates(GeoLocationService)
     }
 
+    @SuppressLint("MissingPermission")
     override fun onResume() {
         super.onResume()
         val locationManager =
             applicationContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        @SuppressLint("MissingPermission")
         if (hasPermission()) {
             val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
             if (location != null) {

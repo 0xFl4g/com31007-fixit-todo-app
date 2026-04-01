@@ -31,17 +31,16 @@ import java.time.LocalDateTime
 @Composable
 fun EditTaskContent(
     modifier: Modifier,
-    editTaskViewModel: EditTaskViewModel, // Assuming a similar ViewModel for editing tasks
+    editTaskViewModel: EditTaskViewModel,
     navController: NavController,
     taskId: Int
 ) {
-    // Assuming the ViewModel has a function to get a task by ID
     editTaskViewModel.loadTaskById(taskId)
     val task by editTaskViewModel.task.collectAsState()
     val localTask = task
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
