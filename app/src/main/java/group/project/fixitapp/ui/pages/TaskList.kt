@@ -10,21 +10,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.Checkbox
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +40,7 @@ import group.project.fixitapp.data.entities.TaskEntity
 import group.project.fixitapp.ui.theme.MediumPadding
 import group.project.fixitapp.ui.theme.SmallPadding
 import group.project.fixitapp.ui.viewmodel.TaskListViewModel
+import group.project.fixitapp.utils.TaskSortOrder
 
 // Define an enum or sealed class for the criteria
 sealed class TaskLoadCriteria {
@@ -45,6 +49,7 @@ sealed class TaskLoadCriteria {
     data class ListId(val id: Int) : TaskLoadCriteria()
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListScreen(
     viewModel: TaskListViewModel,
@@ -52,23 +57,14 @@ fun TaskListScreen(
     navController: NavController
 ) {
     val listNameState by viewModel.listName.collectAsState()
-    var listName = "Default"
-    when (criteria) {
-        is TaskLoadCriteria.MyDay -> {
-            listName = "My Day"
-            viewModel.loadMyDayTasks()
-        }
+    val listName = when (criteria) {
+        is TaskLoadCriteria.MyDay -> "My Day"
+        is TaskLoadCriteria.Unlisted -> "Unlisted"
+        is TaskLoadCriteria.ListId -> listNameState
+    }
 
-        is TaskLoadCriteria.Unlisted -> {
-            listName = "Unlisted"
-            viewModel.loadUnlistedTasks()
-        }
-
-        is TaskLoadCriteria.ListId -> {
-            viewModel.loadListName(criteria.id)
-            listName = listNameState
-            viewModel.loadTasksByListId(criteria.id)
-        }
+    LaunchedEffect(criteria) {
+        viewModel.setCriteria(criteria)
     }
 
     val tasks by viewModel.tasks.collectAsState()
@@ -80,7 +76,7 @@ fun TaskListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                backgroundColor = colorScheme.primary,
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.primary),
                 title = { Text("Tasks", color = colorScheme.onPrimary) },
                 actions = {
                     IconButton(onClick = { showDialog.value = true }) {
@@ -97,7 +93,7 @@ fun TaskListScreen(
         Column {
             Text(
                 text = "List: $listName",
-                style = MaterialTheme.typography.h6,
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(MediumPadding)
             )
             LazyColumn(
@@ -115,9 +111,7 @@ fun TaskListScreen(
                                 )
                             )
                         },
-                        viewModel = viewModel,
-                        navController = navController,
-                        criteria = criteria
+                        viewModel = viewModel
                     )
                 }
             }
@@ -129,25 +123,13 @@ fun TaskListScreen(
                 title = { Text("Sort tasks by") },
                 text = {
                     Column {
-                        TaskListViewModel.TaskSortOrder.values().forEach { order ->
+                        TaskSortOrder.entries.forEach { order ->
                             Text(
                                 text = order.name,
                                 modifier = Modifier
                                     .padding(top = SmallPadding, bottom = SmallPadding)
                                     .clickable {
-                                        when (criteria) {
-                                            is TaskLoadCriteria.ListId -> {
-                                                viewModel.changeSortOrder(order, criteria.id)
-                                            }
-
-                                            is TaskLoadCriteria.MyDay -> {
-                                                viewModel.changeSortOrderForMyDay(order)
-                                            }
-
-                                            is TaskLoadCriteria.Unlisted -> {
-                                                viewModel.changeSortOrderForUnlisted(order)
-                                            }
-                                        }
+                                        viewModel.changeSortOrder(order)
                                         showDialog.value = false
                                     }
                             )
@@ -158,7 +140,7 @@ fun TaskListScreen(
                     Button(
                         onClick = { showDialog.value = false },
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = colorScheme.primary,
+                            containerColor = colorScheme.primary,
                             contentColor = colorScheme.onPrimary
                         )
                     ) {
@@ -174,9 +156,7 @@ fun TaskListScreen(
 fun TaskItem(
     task: TaskEntity,
     onTaskClick: () -> Unit,
-    viewModel: TaskListViewModel,
-    navController: NavController,
-    criteria: TaskLoadCriteria
+    viewModel: TaskListViewModel
 ) {
     Card( // Wrap the Row in a Card
         modifier = Modifier
@@ -191,30 +171,11 @@ fun TaskItem(
             Checkbox(
                 checked = (task.completedAt != null),
                 onCheckedChange = { isChecked ->
-                    // Handle task completion
+                    // Handle task completion; the observed Flow refreshes the list
                     if (isChecked) {
-                        // If the checkbox is checked, set the completedAt property to the current time
                         viewModel.completeTask(task.id!!)
                     } else {
-                        // If the checkbox is unchecked, set the completedAt property to null
                         viewModel.reopenTask(task.id!!)
-                    }
-
-                    if (criteria is TaskLoadCriteria.MyDay) {
-                        navController.navigate(
-                            Destinations.TASK_LIST_MY_DAY_ROUTE
-                        )
-                    } else if (task.listId != null) {
-                        navController.navigate(
-                            Destinations.TASK_LIST_SPECIFIC_ID_ROUTE.replace(
-                                "{listId}",
-                                task.listId.toString()
-                            )
-                        )
-                    } else {
-                        navController.navigate(
-                            Destinations.TASK_LIST_UNLISTED_ROUTE
-                        )
                     }
                 }
             )
@@ -222,9 +183,9 @@ fun TaskItem(
             Spacer(modifier = Modifier.width(SmallPadding))
 
             Column(modifier = Modifier.weight(1f)) {
-                Text(task.title, style = MaterialTheme.typography.subtitle1)
+                Text(task.title, style = MaterialTheme.typography.titleMedium)
                 task.note?.let {
-                    Text(it, style = MaterialTheme.typography.body2)
+                    Text(it, style = MaterialTheme.typography.bodyMedium)
                 }
                 // Add more task details like due date, priority, etc.
             }

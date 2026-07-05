@@ -6,20 +6,27 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import group.project.fixitapp.Destinations
 import group.project.fixitapp.data.entities.TaskEntity
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class EditTaskViewModel(app: Application) : TaskViewModel(app) {
-    private val _task = MutableStateFlow<TaskEntity?>(null)
-    val task: StateFlow<TaskEntity?> get() = _task.asStateFlow()
+    private val taskId = MutableStateFlow<Int?>(null)
 
-    fun loadTaskById(taskId: Int) {
-        viewModelScope.launch {
-            _task.value = taskDao.getTaskById(taskId)
-        }
+    val task: StateFlow<TaskEntity?> = taskId
+        .filterNotNull()
+        .flatMapLatest { taskDao.observeTaskById(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    fun loadTaskById(id: Int) {
+        taskId.value = id
     }
 
     fun editTask(
@@ -60,6 +67,11 @@ class EditTaskViewModel(app: Application) : TaskViewModel(app) {
             )
 
             taskDao.updateTask(updatedTask)
+
+            // Replace any previously scheduled reminder with the new one
+            cancelReminder(id)
+            scheduleReminderIfEnabled(updatedTask)
+
             navController.navigate(
                 Destinations.TASK_DETAIL_ROUTE.replace(
                     "{taskId}",

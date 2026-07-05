@@ -4,11 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Scaffold
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
@@ -33,10 +34,11 @@ import group.project.fixitapp.ui.viewmodel.EditTaskViewModel
 import group.project.fixitapp.ui.viewmodel.LocationViewModel
 import group.project.fixitapp.ui.viewmodel.TaskListViewModel
 import group.project.fixitapp.ui.viewmodel.TemplateTaskListViewModel
+import group.project.fixitapp.utils.NOTIFICATION_CHANNEL_ID
 import group.project.fixitapp.utils.createNotificationChannel
 
 class MainActivity : ComponentActivity() {
-    private val gpsLocationPermissionRequest = 1
+    private val runtimePermissionRequest = 1
 
     @Composable
     fun MainApp() {
@@ -48,22 +50,25 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestMissingPermissions()
+        createNotificationChannel(
+            applicationContext,
+            NOTIFICATION_CHANNEL_ID,
+            "FixItApp Notification Channel"
+        )
         setContent {
             val locationViewModel = viewModel<LocationViewModel>()
             GeoLocationService.locationViewModel = locationViewModel
-            if (!hasPermission()) {
-                requestFineLocationPermission()
-            }
-            createNotificationChannel(
-                applicationContext,
-                "FixItApp",
-                "FixItApp Notification Channel"
-            )
             FixItAppTheme {
                 MainApp()
             }
-
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // The singleton must not retain the ViewModel past the activity's lifetime
+        GeoLocationService.locationViewModel = null
     }
 
     override fun onPause() {
@@ -92,15 +97,26 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun requestFineLocationPermission() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(
-                android.Manifest.permission.ACCESS_FINE_LOCATION,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION
-            ),
-            gpsLocationPermissionRequest
-        )
+    private fun requestMissingPermissions() {
+        val missing = mutableListOf<String>()
+        if (!hasPermission()) {
+            missing += android.Manifest.permission.ACCESS_FINE_LOCATION
+            missing += android.Manifest.permission.ACCESS_COARSE_LOCATION
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            PackageManager.PERMISSION_GRANTED != ActivityCompat.checkSelfPermission(
+                applicationContext, android.Manifest.permission.POST_NOTIFICATIONS
+            )
+        ) {
+            missing += android.Manifest.permission.POST_NOTIFICATIONS
+        }
+        if (missing.isNotEmpty()) {
+            ActivityCompat.requestPermissions(
+                this,
+                missing.toTypedArray(),
+                runtimePermissionRequest
+            )
+        }
     }
 
     private fun hasPermission(): Boolean {

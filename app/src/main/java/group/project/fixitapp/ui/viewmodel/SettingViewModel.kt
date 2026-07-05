@@ -8,6 +8,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import group.project.fixitapp.data.AppDatabase
 import group.project.fixitapp.data.entities.SettingEntity
+import group.project.fixitapp.utils.cancelTaskReminder
+import group.project.fixitapp.utils.cleanupTaskArtifacts
+import group.project.fixitapp.utils.rescheduleAllReminders
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
@@ -43,6 +46,16 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
                 it.updatedAt = LocalDateTime.now()
                 updateSetting(it)
             }
+
+            // Apply the toggle to already-existing reminders
+            val app = getApplication<Application>()
+            if (enabled) {
+                rescheduleAllReminders(app)
+            } else {
+                for (task in taskDao.getAllTasks()) {
+                    task.id?.let { cancelTaskReminder(app, it) }
+                }
+            }
         }
     }
 
@@ -57,18 +70,22 @@ class SettingsViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    private fun updateSetting(setting: SettingEntity) {
-        viewModelScope.launch {
-            settingDao.updateSetting(setting)
-            when (setting.name) {
-                "notifyDueReminderTasks" -> notifyDueReminderTasks = setting.isActive
-                "notifyGeoLocatedTasks" -> notifyGeoLocatedTasks = setting.isActive
-            }
+    // Suspends (rather than launching its own coroutine) so callers can rely on the
+    // row being persisted before they act on it — e.g. rescheduleAllReminders re-reads
+    // this setting from the DB and would otherwise see a stale value.
+    private suspend fun updateSetting(setting: SettingEntity) {
+        settingDao.updateSetting(setting)
+        when (setting.name) {
+            "notifyDueReminderTasks" -> notifyDueReminderTasks = setting.isActive
+            "notifyGeoLocatedTasks" -> notifyGeoLocatedTasks = setting.isActive
         }
     }
 
     fun deleteEverything() {
         viewModelScope.launch {
+            for (task in taskDao.getAllTasks()) {
+                cleanupTaskArtifacts(getApplication(), task)
+            }
             taskDao.deleteThemAll()
             listDao.deleteThemAll()
         }

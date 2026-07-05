@@ -14,18 +14,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.automirrored.filled.List
@@ -51,13 +53,15 @@ import group.project.fixitapp.data.entities.ListEntity
 import group.project.fixitapp.ui.theme.MediumPadding
 import group.project.fixitapp.ui.theme.SmallPadding
 import group.project.fixitapp.ui.viewmodel.HomeViewModel
+import group.project.fixitapp.utils.ListSortOrder
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeTopBar() {
     TopAppBar(
         //title
         title = { Text("FixIt", color = colorScheme.onPrimary) },
-        backgroundColor = colorScheme.primary,
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.primary),
         navigationIcon = {
             // Adding padding inside the icon while maintaining its size
             Box(modifier = Modifier.padding(start = MediumPadding)) {
@@ -93,7 +97,7 @@ fun HomeContent(modifier: Modifier, viewModel: HomeViewModel, navController: Nav
     Column(modifier = modifier.fillMaxSize()) {
         Text(
             text = "Task Lists",
-            style = MaterialTheme.typography.h6,
+            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(start = MediumPadding, top = MediumPadding)
         )
 
@@ -107,7 +111,7 @@ fun HomeContent(modifier: Modifier, viewModel: HomeViewModel, navController: Nav
         ) { navController.navigate(Destinations.TASK_LIST_UNLISTED_ROUTE) }
 
         Spacer(modifier = Modifier.height(SmallPadding))
-        Divider()
+        HorizontalDivider()
         Spacer(modifier = Modifier.height(SmallPadding))
 
         UserListsSection(userLists, navController)
@@ -120,7 +124,6 @@ fun UserListsSection(userLists: List<ListEntity>, navController: NavController) 
     var showEdit by rememberSaveable { mutableStateOf(false) }
     var showDelete by rememberSaveable { mutableStateOf(false) }
     var showSort by rememberSaveable { mutableStateOf(false) }
-    var default by rememberSaveable { mutableStateOf(true) }
     var newName by rememberSaveable { mutableStateOf("") }
     var currentListId by rememberSaveable { mutableIntStateOf(0) }
 
@@ -130,11 +133,10 @@ fun UserListsSection(userLists: List<ListEntity>, navController: NavController) 
         // Subtitle for the User Lists
         Text(
             text = "Your Lists",
-            style = MaterialTheme.typography.h6,
+            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(start = MediumPadding)
         )
     }
-
 
     Column(modifier = Modifier, verticalArrangement = Arrangement.Center) {
         Row(modifier = Modifier, horizontalArrangement = Arrangement.End) {
@@ -144,7 +146,7 @@ fun UserListsSection(userLists: List<ListEntity>, navController: NavController) 
                     .fillMaxWidth()
                     .padding(SmallPadding),
                 colors = ButtonDefaults.buttonColors(
-                    backgroundColor = colorScheme.primary,
+                    containerColor = colorScheme.primary,
                     contentColor = colorScheme.onPrimary
                 )
             ) {
@@ -156,7 +158,7 @@ fun UserListsSection(userLists: List<ListEntity>, navController: NavController) 
             // Message when there are no lists
             Text(
                 text = "You have no lists",
-                style = MaterialTheme.typography.subtitle2,
+                style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.padding(MediumPadding)
             )
         } else {
@@ -186,7 +188,7 @@ fun UserListsSection(userLists: List<ListEntity>, navController: NavController) 
                                 Column {
                                     TextButton(
                                         colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = Color.Transparent,
+                                            containerColor = Color.Transparent,
                                             contentColor = colorScheme.secondary
                                         ),
                                         onClick = { showEdit = true; currentListId = list.id!! },
@@ -199,7 +201,7 @@ fun UserListsSection(userLists: List<ListEntity>, navController: NavController) 
                                 Column {
                                     TextButton(
                                         colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = Color.Transparent,
+                                            containerColor = Color.Transparent,
                                             contentColor = colorScheme.secondary
                                         ),
                                         onClick = { showDelete = true; currentListId = list.id!! },
@@ -210,167 +212,144 @@ fun UserListsSection(userLists: List<ListEntity>, navController: NavController) 
                                 }
                             }
                         }
-
                     }
-
-                    if (showEdit) {
-                        AlertDialog(
-                            onDismissRequest = { showEdit = false },
-                            text = {
-                                OutlinedTextField(
-                                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                                        focusedBorderColor = colorScheme.primary,
-                                        focusedLabelColor = colorScheme.primary
-                                    ),
-                                    value = newName,
-                                    onValueChange = { newName = it },
-                                    label = { Text("New List Name") }
-                                )
-                            },
-                            confirmButton = {
-                                TextButton(
-                                    onClick = {
-                                        currentListId.let {
-                                            homeViewModel.editListName(
-                                                it,
-                                                newName
-                                            )
-                                        }
-                                        showEdit = false
-                                        navController.navigate(Destinations.HOME_ROUTE)
-                                    },
-                                    colors = ButtonDefaults.buttonColors(
-                                        backgroundColor = colorScheme.primary,
-                                        contentColor = colorScheme.onPrimary
-                                    )
-                                ) {
-                                    Text("Rename List")
-                                }
-                            },
-                            dismissButton = {
-                                Button(
-                                    onClick = { showEdit = false },
-                                    colors = ButtonDefaults.buttonColors(
-                                        backgroundColor = colorScheme.tertiary,
-                                        contentColor = colorScheme.onError
-                                    )
-                                ) {
-                                    Text(text = "Cancel")
-                                }
-                            }
-                        )
-                    }
-
-                    if (showDelete) {
-                        AlertDialog(
-                            onDismissRequest = { showDelete = false },
-                            text = {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(SmallPadding),
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Text(text = "Are you sure you want to delete list?")
-                                }
-                            },
-                            confirmButton = {
-                                Row {
-                                    TextButton(
-                                        onClick = {
-                                            showDelete = false
-                                            homeViewModel.deleteListWithoutUnlisted(currentListId)
-                                            navController.navigate(Destinations.HOME_ROUTE)
-                                        },
-                                        colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = colorScheme.error,
-                                            contentColor = colorScheme.onError
-                                        )
-                                    ) {
-                                        Text("Delete List and Tasks")
-                                    }
-                                }
-                                Row {
-                                    TextButton(
-                                        onClick = {
-                                            showDelete = false
-                                            homeViewModel.deleteListMoveUnlisted(
-                                                currentListId,
-                                                navController
-                                            )
-                                        },
-                                        colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = colorScheme.secondary,
-                                            contentColor = colorScheme.onSecondary
-                                        )
-                                    ) {
-                                        Text("Delete List and move tasks to Unlisted")
-                                    }
-                                }
-                            },
-                            dismissButton = {
-                                Row {
-                                    Button(
-                                        onClick = {
-                                            showDelete = false
-                                            navController.navigate(Destinations.HOME_ROUTE)
-                                        },
-                                        colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = colorScheme.tertiary,
-                                            contentColor = colorScheme.onError
-                                        )
-                                    ) {
-                                        Text(text = "Cancel")
-                                    }
-                                }
-                            }
-                        )
-                    }
-
-                    if (showSort) {
-                        AlertDialog(
-                            onDismissRequest = { showSort = false },
-                            title = { Text("Sort lists by") },
-                            text = {
-                                Column {
-                                    HomeViewModel.ListSortOrder.values().forEach { order ->
-                                        Text(
-                                            text = order.name,
-                                            modifier = Modifier
-                                                .padding(top = SmallPadding, bottom = SmallPadding)
-                                                .clickable {
-
-                                                    homeViewModel.changeSortOrder(order)
-                                                    default = false
-                                                    showSort = false
-                                                }
-                                        )
-                                    }
-                                }
-                            },
-                            confirmButton = {
-                                Button(
-                                    onClick = { showSort = false },
-                                    colors = ButtonDefaults.buttonColors(
-                                        backgroundColor = colorScheme.primary,
-                                        contentColor = colorScheme.onPrimary
-                                    )
-                                ) {
-                                    Text("Close")
-                                }
-                            }
-                        )
-                    }
-
-                    if (default) {
-                        homeViewModel.changeSortOrder(HomeViewModel.ListSortOrder.Name)
-                    }
-
-
                 }
             }
         }
+    }
 
+    if (showEdit) {
+        AlertDialog(
+            onDismissRequest = { showEdit = false },
+            text = {
+                OutlinedTextField(
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = colorScheme.primary,
+                        focusedLabelColor = colorScheme.primary
+                    ),
+                    value = newName,
+                    onValueChange = { newName = it },
+                    label = { Text("New List Name") }
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        homeViewModel.editListName(currentListId, newName)
+                        showEdit = false
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorScheme.primary,
+                        contentColor = colorScheme.onPrimary
+                    )
+                ) {
+                    Text("Rename List")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showEdit = false },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorScheme.tertiary,
+                        contentColor = colorScheme.onError
+                    )
+                ) {
+                    Text(text = "Cancel")
+                }
+            }
+        )
+    }
+
+    if (showDelete) {
+        AlertDialog(
+            onDismissRequest = { showDelete = false },
+            text = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(SmallPadding),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(text = "Are you sure you want to delete list?")
+                }
+            },
+            confirmButton = {
+                Row {
+                    TextButton(
+                        onClick = {
+                            showDelete = false
+                            homeViewModel.deleteListWithoutUnlisted(currentListId)
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colorScheme.error,
+                            contentColor = colorScheme.onError
+                        )
+                    ) {
+                        Text("Delete List and Tasks")
+                    }
+                }
+                Row {
+                    TextButton(
+                        onClick = {
+                            showDelete = false
+                            homeViewModel.deleteListMoveUnlisted(currentListId)
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colorScheme.secondary,
+                            contentColor = colorScheme.onSecondary
+                        )
+                    ) {
+                        Text("Delete List and move tasks to Unlisted")
+                    }
+                }
+            },
+            dismissButton = {
+                Row {
+                    Button(
+                        onClick = { showDelete = false },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colorScheme.tertiary,
+                            contentColor = colorScheme.onError
+                        )
+                    ) {
+                        Text(text = "Cancel")
+                    }
+                }
+            }
+        )
+    }
+
+    if (showSort) {
+        AlertDialog(
+            onDismissRequest = { showSort = false },
+            title = { Text("Sort lists by") },
+            text = {
+                Column {
+                    ListSortOrder.entries.forEach { order ->
+                        Text(
+                            text = order.name,
+                            modifier = Modifier
+                                .padding(top = SmallPadding, bottom = SmallPadding)
+                                .clickable {
+                                    homeViewModel.changeSortOrder(order)
+                                    showSort = false
+                                }
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showSort = false },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorScheme.primary,
+                        contentColor = colorScheme.onPrimary
+                    )
+                ) {
+                    Text("Close")
+                }
+            }
+        )
     }
 }
 

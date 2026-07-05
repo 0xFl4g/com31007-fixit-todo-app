@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import group.project.fixitapp.data.entities.TaskEntity
+import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 
 @Dao
@@ -28,45 +29,30 @@ interface TaskDAO {
     @Query("DELETE FROM task")
     suspend fun deleteThemAll()
 
-    @Query("SELECT title FROM task WHERE id = :id LIMIT 1")
-    suspend fun getTaskNameById(id: Int): String
+    @Query("SELECT * FROM task")
+    suspend fun getAllTasks(): List<TaskEntity>
+
+    @Query("SELECT * FROM task WHERE latitude IS NOT NULL AND longitude IS NOT NULL AND completed_at IS NULL")
+    suspend fun getIncompleteTasksWithLocation(): List<TaskEntity>
 
     @Query("SELECT * FROM task WHERE id = :id")
     suspend fun getTaskById(id: Int): TaskEntity?
 
-    //Returns the name of the title
-    @Query("SELECT * FROM task WHERE title = :taskName LIMIT 1")
-    suspend fun getTaskByName(taskName: String): TaskEntity?
-
     @Query("SELECT * FROM task WHERE list_id = :listId")
     suspend fun getTasksByListId(listId: Int): List<TaskEntity>
 
-    @Query("SELECT * FROM task WHERE list_id = :listId ORDER BY title ASC")
-    suspend fun getTasksByListIdSortedByTitle(listId: Int): List<TaskEntity>
+    // Observable variants — Room re-emits whenever the underlying tables change
+    @Query("SELECT * FROM task WHERE id = :id")
+    fun observeTaskById(id: Int): Flow<TaskEntity?>
 
-    @Query("SELECT * FROM task WHERE list_id = :listId ORDER BY due_at DESC")
-    suspend fun getTasksByListIdSortedByDueDate(listId: Int): List<TaskEntity>
+    @Query("SELECT * FROM task WHERE list_id = :listId")
+    fun observeTasksByListId(listId: Int): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM task WHERE list_id = :listId ORDER BY priority DESC")
-    suspend fun getTasksByListIdSortedByPriority(listId: Int): List<TaskEntity>
+    @Query("SELECT * FROM task WHERE list_id IS NULL")
+    fun observeUnlistedTasks(): Flow<List<TaskEntity>>
 
-    @Query("SELECT * FROM task WHERE list_id IS NULL ORDER BY title ASC")
-    suspend fun getUnlistedTasksSortedByTitle(): List<TaskEntity>
-
-    @Query("SELECT * FROM task WHERE list_id IS NULL ORDER BY due_at DESC")
-    suspend fun getUnlistedTasksSortedByDueDate(): List<TaskEntity>
-
-    @Query("SELECT * FROM task WHERE list_id IS NULL ORDER BY priority DESC")
-    suspend fun getUnlistedTasksSortedByPriority(): List<TaskEntity>
-
-    @Query("SELECT * FROM task WHERE date(due_at) = date(:today) ORDER BY title ASC")
-    suspend fun getTasksDueTodaySortedByTitle(today: LocalDateTime): List<TaskEntity>
-
-    @Query("SELECT * FROM task WHERE date(due_at) = date(:today) ORDER BY due_at DESC")
-    suspend fun getTasksDueTodaySortedByDueDate(today: LocalDateTime): List<TaskEntity>
-
-    @Query("SELECT * FROM task WHERE date(due_at) = date(:today) ORDER BY priority DESC")
-    suspend fun getTasksDueTodaySortedByPriority(today: LocalDateTime): List<TaskEntity>
+    @Query("SELECT * FROM task WHERE date(due_at) = date(:today)")
+    fun observeTasksDueToday(today: LocalDateTime): Flow<List<TaskEntity>>
 
     // Get list name
     @Query("SELECT name FROM list WHERE id = :listId LIMIT 1")

@@ -14,16 +14,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -56,7 +58,9 @@ fun ViewTaskContent(
     var deletionAlert by rememberSaveable { mutableStateOf(false) }
 
     // loads whole task, each part can be accessed through wholeTask.{fieldName}
-    viewModel.loadTaskById(id)
+    LaunchedEffect(id) {
+        viewModel.loadTaskById(id)
+    }
     val task by viewModel.task.collectAsState()
     val localTask = task
 
@@ -93,7 +97,7 @@ fun ViewTaskContent(
             if (localTask != null) {
                 Text(
                     text = localTask.title,
-                    style = androidx.compose.material.MaterialTheme.typography.h4, // Adjust typography as per your theme
+                    style = MaterialTheme.typography.headlineMedium, // Adjust typography as per your theme
                     color = colorScheme.primary
                 )
             }
@@ -115,7 +119,7 @@ fun ViewTaskContent(
             }
             Text(
                 text = annotatedString,
-                style = androidx.compose.material.MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.titleMedium,
             )
         }
 
@@ -135,7 +139,7 @@ fun ViewTaskContent(
             }
             Text(
                 text = annotatedString,
-                style = androidx.compose.material.MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.titleMedium,
             )
         }
 
@@ -156,7 +160,7 @@ fun ViewTaskContent(
             }
             Text(
                 text = annotatedString,
-                style = androidx.compose.material.MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.titleMedium,
             )
         }
 
@@ -179,7 +183,7 @@ fun ViewTaskContent(
             }
             Text(
                 text = annotatedString,
-                style = androidx.compose.material.MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.titleMedium,
             )
         }
 
@@ -225,7 +229,7 @@ fun ViewTaskContent(
                         onClick = { showTemplateSavedDialog = false },
                         colors = ButtonDefaults.buttonColors(
                             contentColor = colorScheme.onPrimary,
-                            backgroundColor = colorScheme.primary
+                            containerColor = colorScheme.primary
                         )
                     ) {
                         Text("OK")
@@ -248,7 +252,7 @@ fun ViewTaskContent(
         ) {
             Text(
                 text = "Location",
-                style = androidx.compose.material.MaterialTheme.typography.h6, // Adjust typography as per your theme
+                style = MaterialTheme.typography.titleLarge, // Adjust typography as per your theme
                 color = colorScheme.primary
             )
         }
@@ -276,7 +280,7 @@ fun ViewTaskContent(
             }
             Text(
                 text = annotatedString,
-                style = androidx.compose.material.MaterialTheme.typography.subtitle2,
+                style = MaterialTheme.typography.titleSmall,
             )
         }
 
@@ -303,7 +307,7 @@ fun ViewTaskContent(
             }
             Text(
                 text = annotatedString,
-                style = androidx.compose.material.MaterialTheme.typography.subtitle2,
+                style = MaterialTheme.typography.titleSmall,
             )
         }
 
@@ -320,18 +324,15 @@ fun ViewTaskContent(
                         viewModel.distanceFromLocation(lat, lon)
                     }
                 }
-                distance?.let {
-                    append(
-                        String.format(
-                            "%.1f metres",
-                            it
-                        )
-                    ) // Format the distance to 1 decimal place
+                if (distance != null) {
+                    append(String.format("%.1f metres", distance))
+                } else {
+                    append("Unknown")
                 }
             }
             Text(
                 text = annotatedString,
-                style = androidx.compose.material.MaterialTheme.typography.subtitle2,
+                style = MaterialTheme.typography.titleSmall,
             )
         }
 
@@ -347,7 +348,7 @@ fun ViewTaskContent(
         ) {
             Text(
                 text = "Task Dates",
-                style = androidx.compose.material.MaterialTheme.typography.h6, // Adjust typography as per your theme
+                style = MaterialTheme.typography.titleLarge, // Adjust typography as per your theme
                 color = colorScheme.primary
             )
         }
@@ -366,7 +367,7 @@ fun ViewTaskContent(
             }
             Text(
                 text = annotatedString,
-                style = androidx.compose.material.MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.titleMedium,
             )
         }
 
@@ -384,7 +385,7 @@ fun ViewTaskContent(
             }
             Text(
                 text = annotatedString,
-                style = androidx.compose.material.MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.titleMedium,
             )
         }
 
@@ -402,7 +403,7 @@ fun ViewTaskContent(
             }
             Text(
                 text = annotatedString,
-                style = androidx.compose.material.MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.titleMedium,
             )
         }
 
@@ -414,7 +415,7 @@ fun ViewTaskContent(
         ) {
             Text(
                 text = "Attached Image",
-                style = androidx.compose.material.MaterialTheme.typography.h6, // Adjust typography as per your theme
+                style = MaterialTheme.typography.titleLarge, // Adjust typography as per your theme
                 color = colorScheme.primary
             )
         }
@@ -455,19 +456,11 @@ fun ViewTaskContent(
                 if (localTask != null) {
                     if (localTask.completedAt != null) {
                         Button(
-                            onClick = {
-                                viewModel.reopenTask(id)
-                                navController.navigate(
-                                    Destinations.TASK_DETAIL_ROUTE.replace(
-                                        "{taskId}",
-                                        id.toString()
-                                    )
-                                )
-                            },
+                            onClick = { viewModel.reopenTask(id) },
                             modifier = Modifier
                                 .padding(5.dp),
                             colors = ButtonDefaults.buttonColors(
-                                backgroundColor = colorScheme.primary,
+                                containerColor = colorScheme.primary,
                                 contentColor = colorScheme.onPrimary
                             )
                         ) {
@@ -475,19 +468,11 @@ fun ViewTaskContent(
                         }
                     } else {
                         Button(
-                            onClick = {
-                                viewModel.completeTask(id)
-                                navController.navigate(
-                                    Destinations.TASK_DETAIL_ROUTE.replace(
-                                        "{taskId}",
-                                        id.toString()
-                                    )
-                                )
-                            },
+                            onClick = { viewModel.completeTask(id) },
                             modifier = Modifier
                                 .padding(5.dp),
                             colors = ButtonDefaults.buttonColors(
-                                backgroundColor = colorScheme.primary,
+                                containerColor = colorScheme.primary,
                                 contentColor = colorScheme.onPrimary
                             )
                         ) {
@@ -527,7 +512,7 @@ fun ViewTaskContent(
                     modifier = Modifier
                         .padding(5.dp),
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = colorScheme.error,
+                        containerColor = colorScheme.error,
                         contentColor = colorScheme.onError
                     )
                 ) {
@@ -551,7 +536,7 @@ fun ViewTaskContent(
 
                     },
 
-                    buttons = {
+                    confirmButton = {
                         Row(
                             modifier = Modifier
                                 .padding(SmallPadding)
@@ -561,7 +546,7 @@ fun ViewTaskContent(
                             Button(
                                 onClick = { deletionAlert = false },
                                 colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = colorScheme.tertiary,
+                                    containerColor = colorScheme.tertiary,
                                     contentColor = colorScheme.onError
                                 )
                             ) {
@@ -578,7 +563,7 @@ fun ViewTaskContent(
                                     deletionAlert = false
                                 },
                                 colors = ButtonDefaults.buttonColors(
-                                    backgroundColor = colorScheme.error,
+                                    containerColor = colorScheme.error,
                                     contentColor = colorScheme.onError
                                 )
                             ) {

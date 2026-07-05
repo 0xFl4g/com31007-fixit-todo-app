@@ -13,18 +13,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,7 +54,9 @@ fun ViewTemplateTaskContent(
     id: Int,
     navController: NavController
 ) {
-    viewModel.loadTemplateTask(id)
+    LaunchedEffect(id) {
+        viewModel.loadTemplateTask(id)
+    }
     val templateTask by viewModel.templateTask.collectAsState()
     val formatterDate = DateTimeFormatter.ofPattern("d/M/yyyy")
     val formatterTime = DateTimeFormatter.ofPattern("h:mm a")
@@ -69,7 +72,7 @@ fun ViewTemplateTaskContent(
         Spacer(modifier = Modifier.height(5.dp))
         Text(
             text = "${templateTask?.title ?: "No title"}",
-            style = MaterialTheme.typography.h4, // Adjust typography as per your theme
+            style = MaterialTheme.typography.headlineMedium, // Adjust typography as per your theme
             color = colorScheme.primary // Adjust color as per your theme
         )
 
@@ -171,7 +174,7 @@ fun ViewTemplateTaskContent(
                 onClick = { deletionAlert = true },
                 colors = ButtonDefaults.buttonColors(
                     contentColor = colorScheme.onError,
-                    backgroundColor = colorScheme.error
+                    containerColor = colorScheme.error
                 )
             ) {
                 Row(
@@ -204,7 +207,7 @@ fun ViewTemplateTaskContent(
 
             },
 
-            buttons = {
+            confirmButton = {
                 Row(
                     modifier = Modifier
                         .padding(SmallPadding)
@@ -214,7 +217,7 @@ fun ViewTemplateTaskContent(
                     Button(
                         onClick = { deletionAlert = false },
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = colorScheme.tertiary,
+                            containerColor = colorScheme.tertiary,
                             contentColor = colorScheme.onError
                         )
                     ) {
@@ -226,7 +229,7 @@ fun ViewTemplateTaskContent(
                             deletionAlert = false
                         },
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = colorScheme.error,
+                            containerColor = colorScheme.error,
                             contentColor = colorScheme.onError
                         )
                     ) {

@@ -7,14 +7,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,7 +36,9 @@ fun EditTaskContent(
     navController: NavController,
     taskId: Int
 ) {
-    editTaskViewModel.loadTaskById(taskId)
+    LaunchedEffect(taskId) {
+        editTaskViewModel.loadTaskById(taskId)
+    }
     val task by editTaskViewModel.task.collectAsState()
     val localTask = task
 
@@ -46,7 +49,7 @@ fun EditTaskContent(
     ) {
         Text(
             text = "Edit Task",
-            style = MaterialTheme.typography.h4,
+            style = MaterialTheme.typography.headlineMedium,
             color = colorScheme.onSurface
         )
 
@@ -150,7 +153,7 @@ fun EditTaskButton(
             .fillMaxWidth()
             .padding(5.dp),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = colorScheme.primary,
+            containerColor = colorScheme.primary,
             contentColor = colorScheme.onPrimary
         )
     ) {

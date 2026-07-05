@@ -22,20 +22,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Slider
-import androidx.compose.material.SliderDefaults
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Place
@@ -88,7 +88,7 @@ fun NewTaskContent(
     ) {
         Text(
             text = "Create Task",
-            style = MaterialTheme.typography.h4, // Adjust typography as per your theme
+            style = MaterialTheme.typography.headlineMedium, // Adjust typography as per your theme
             color = colorScheme.primary // Adjust color as per your theme
         )
 
@@ -140,7 +140,7 @@ fun NewTaskContent(
 fun taskTitleInput(initialTitle: String): String {
     var taskTitle by rememberSaveable { mutableStateOf(initialTitle) }
 
-    Text(text = "Title for Task", style = MaterialTheme.typography.subtitle1)
+    Text(text = "Title for Task", style = MaterialTheme.typography.titleMedium)
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         OutlinedTextField(
@@ -148,7 +148,7 @@ fun taskTitleInput(initialTitle: String): String {
             onValueChange = { taskTitle = it },
             label = { Text("New Task") },
             singleLine = true,
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = colorScheme.primary,
                 focusedLabelColor = colorScheme.primary
             )
@@ -206,12 +206,12 @@ fun taskDueDateSelection(
         }, currentYear, currentMonth, currentDay
     )
 
-    Text(text = "Set Due Date and Time", style = MaterialTheme.typography.subtitle1)
+    Text(text = "Set Due Date and Time", style = MaterialTheme.typography.titleMedium)
 
     Button(
         onClick = { datePickerDialog.show() },
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = colorScheme.primary,
+            containerColor = colorScheme.primary,
             contentColor = colorScheme.onPrimary
         )
     ) {
@@ -263,7 +263,7 @@ fun taskImagePicker(initialPickedImageBitmap: ImageBitmap?): ImageBitmap? {
             ) {
                 Text(
                     "Add Image",
-                    style = MaterialTheme.typography.subtitle1,
+                    style = MaterialTheme.typography.titleMedium,
                     color = colorScheme.primary
                 )
             }
@@ -309,7 +309,7 @@ fun taskReminderDropdown(
     }
 
     Column {
-        Text(text = "Set Reminder", style = MaterialTheme.typography.subtitle1)
+        Text(text = "Set Reminder", style = MaterialTheme.typography.titleMedium)
 
         TextButton(
             onClick = {
@@ -318,7 +318,7 @@ fun taskReminderDropdown(
                 }
             },
             colors = ButtonDefaults.textButtonColors(
-                backgroundColor = colorScheme.primary,
+                containerColor = colorScheme.primary,
                 contentColor = colorScheme.onPrimary
             )
         ) {
@@ -332,6 +332,7 @@ fun taskReminderDropdown(
         ) {
             reminderOptions.forEach { reminderOption ->
                 DropdownMenuItem(
+                    text = { Text(reminderOption) },
                     onClick = {
                         selectedReminderOption = reminderOption
                         // Calculate reminder time based on the selected option
@@ -364,10 +365,8 @@ fun taskReminderDropdown(
                             else -> ""
                         }
                         expanded = false
-                    },
-                ) {
-                    Text(reminderOption)
-                }
+                    }
+                )
             }
         }
     }
@@ -388,12 +387,12 @@ fun taskLocationSelection(
     var latitude by rememberSaveable { mutableStateOf(initialLatitude) }
     var longitude by rememberSaveable { mutableStateOf(initialLongitude) }
 
-    Text(text = "Set Location", style = MaterialTheme.typography.subtitle1)
+    Text(text = "Set Location", style = MaterialTheme.typography.titleMedium)
 
     Button(
         onClick = { showLocationDialog = true },
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = colorScheme.primary,
+            containerColor = colorScheme.primary,
             contentColor = colorScheme.onPrimary
         )
     ) {
@@ -411,7 +410,7 @@ fun taskLocationSelection(
             text = {
                 Column {
                     OutlinedTextField(
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                        colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = colorScheme.primary,
                             focusedLabelColor = colorScheme.primary
                         ),
@@ -424,7 +423,7 @@ fun taskLocationSelection(
                         placeholder = { if (latitude == null) Text("Latitude") }
                     )
                     OutlinedTextField(
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                        colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = colorScheme.primary,
                             focusedLabelColor = colorScheme.primary
                         ),
@@ -444,7 +443,7 @@ fun taskLocationSelection(
                             longitude = locationViewModel.longitude
                         },
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = colorScheme.primary,
+                            containerColor = colorScheme.primary,
                             contentColor = colorScheme.onPrimary
                         )
                     ) {
@@ -452,7 +451,7 @@ fun taskLocationSelection(
                     }
                 }
             },
-            buttons = {
+            confirmButton = {
                 Row(
                     modifier = Modifier
                         .padding(all = SmallPadding)
@@ -462,7 +461,7 @@ fun taskLocationSelection(
                     Button(
                         onClick = { showLocationDialog = false },
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = colorScheme.tertiary,
+                            containerColor = colorScheme.tertiary,
                             contentColor = colorScheme.onError
                         )
                     ) {
@@ -474,7 +473,7 @@ fun taskLocationSelection(
                             showLocationDialog = false
                         },
                         colors = ButtonDefaults.buttonColors(
-                            backgroundColor = colorScheme.primary,
+                            containerColor = colorScheme.primary,
                             contentColor = colorScheme.onPrimary
                         )
                     ) {
@@ -485,11 +484,7 @@ fun taskLocationSelection(
         )
     }
 
-    return if (latitude == 0.0 && longitude == 0.0) {
-        Pair(null, null)
-    } else {
-        Pair(latitude, longitude)
-    }
+    return Pair(latitude, longitude)
 }
 
 @Composable
@@ -508,7 +503,7 @@ fun taskPrioritySetter(initialPriority: Int): Int {
             Spacer(modifier = Modifier.width(SmallPadding)) // Adds spacing between icon and text
             Text(
                 "Set Priority",
-                style = MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.titleMedium,
                 color = colorScheme.onSurface
             )
         }
@@ -559,12 +554,12 @@ fun taskListDropdown(
     }
 
     Column {
-        Text(text = "Select List", style = MaterialTheme.typography.subtitle1)
+        Text(text = "Select List", style = MaterialTheme.typography.titleMedium)
 
         TextButton(
             onClick = { expanded = true },
             colors = ButtonDefaults.textButtonColors(
-                backgroundColor = colorScheme.primary,
+                containerColor = colorScheme.primary,
                 contentColor = colorScheme.onPrimary
             )
         ) {
@@ -577,14 +572,13 @@ fun taskListDropdown(
         ) {
             idToNameMap.forEach { (listId, listName) ->
                 DropdownMenuItem(
+                    text = { Text(listName) },
                     onClick = {
                         selectedListName = listName
                         selectedListId = listId
                         expanded = false
-                    },
-                ) {
-                    Text(listName)
-                }
+                    }
+                )
             }
         }
     }
@@ -605,7 +599,7 @@ fun taskNotes(initialNote: String?): String? {
         textStyle = TextStyle(fontSize = 16.sp),
         minLines = 3,
         maxLines = 5,
-        colors = TextFieldDefaults.outlinedTextFieldColors(
+        colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = colorScheme.primary,
             focusedLabelColor = colorScheme.primary
         )
@@ -656,7 +650,7 @@ fun AddTaskButton(
             .fillMaxWidth()
             .padding(SmallPadding),
         colors = ButtonDefaults.buttonColors(
-            backgroundColor = colorScheme.primary,
+            containerColor = colorScheme.primary,
             contentColor = colorScheme.onPrimary
         )
     ) {

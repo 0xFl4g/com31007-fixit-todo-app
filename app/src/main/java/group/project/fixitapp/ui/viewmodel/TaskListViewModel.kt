@@ -1,98 +1,74 @@
 package group.project.fixitapp.ui.viewmodel
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import group.project.fixitapp.data.AppDatabase
 import group.project.fixitapp.data.entities.TaskEntity
+import group.project.fixitapp.ui.pages.TaskLoadCriteria
+import group.project.fixitapp.utils.TaskSortOrder
+import group.project.fixitapp.utils.sortTasks
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class TaskListViewModel(app: Application) : AndroidViewModel(app) {
-    private val taskDao = AppDatabase.getDatabase(app).taskDAO()
+@OptIn(ExperimentalCoroutinesApi::class)
+class TaskListViewModel(app: Application) : TaskViewModel(app) {
 
-    private val _tasks = MutableStateFlow<List<TaskEntity>>(emptyList())
-    val tasks: StateFlow<List<TaskEntity>> = _tasks
+    private val criteria = MutableStateFlow<TaskLoadCriteria?>(null)
+    private val sortOrder = MutableStateFlow(TaskSortOrder.Priority) // Default to sorting by priority
+
+    val tasks: StateFlow<List<TaskEntity>> = criteria
+        .filterNotNull()
+        .flatMapLatest { current ->
+            when (current) {
+                is TaskLoadCriteria.MyDay ->
+                    taskDao.observeTasksDueToday(LocalDate.now().atStartOfDay())
+                is TaskLoadCriteria.Unlisted -> taskDao.observeUnlistedTasks()
+                is TaskLoadCriteria.ListId -> taskDao.observeTasksByListId(current.id)
+            }
+        }
+        .combine(sortOrder, ::sortTasks)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val _listName = MutableStateFlow("Default")
     val listName: StateFlow<String> get() = _listName.asStateFlow()
 
-    fun loadMyDayTasks() {
-        viewModelScope.launch {
-            val today = LocalDate.now()
-                .atStartOfDay() // Assuming you have converters for LocalDate/LocalDateTime
-            _tasks.value = when (sortOrder.value) {
-                TaskSortOrder.Title -> taskDao.getTasksDueTodaySortedByTitle(today)
-                TaskSortOrder.DueDate -> taskDao.getTasksDueTodaySortedByDueDate(today)
-                TaskSortOrder.Priority -> taskDao.getTasksDueTodaySortedByPriority(today)
-            }
+    fun setCriteria(newCriteria: TaskLoadCriteria) {
+        criteria.value = newCriteria
+        if (newCriteria is TaskLoadCriteria.ListId) {
+            loadListName(newCriteria.id)
         }
     }
 
-    fun loadUnlistedTasks() {
-        viewModelScope.launch {
-            _tasks.value = when (sortOrder.value) {
-                TaskSortOrder.Title -> taskDao.getUnlistedTasksSortedByTitle()
-                TaskSortOrder.DueDate -> taskDao.getUnlistedTasksSortedByDueDate()
-                TaskSortOrder.Priority -> taskDao.getUnlistedTasksSortedByPriority()
-            }
-        }
-    }
-
-    fun loadTasksByListId(listId: Int) {
-        viewModelScope.launch {
-            _tasks.value = when (sortOrder.value) {
-                TaskSortOrder.Title -> taskDao.getTasksByListIdSortedByTitle(listId)
-                TaskSortOrder.DueDate -> taskDao.getTasksByListIdSortedByDueDate(listId)
-                TaskSortOrder.Priority -> taskDao.getTasksByListIdSortedByPriority(listId)
-            }
-        }
-    }
-
-    enum class TaskSortOrder {
-        Title, DueDate, Priority // Add more if needed
-    }
-
-    private val _sortOrder =
-        MutableStateFlow(TaskSortOrder.Priority) // Default to sorting by priority
-    val sortOrder: StateFlow<TaskSortOrder> get() = _sortOrder.asStateFlow()
-
-    fun changeSortOrder(newOrder: TaskSortOrder, listId: Int) {
-        _sortOrder.value = newOrder
-        loadTasksByListId(listId) // This should reload the tasks with the new order
-    }
-
-    fun changeSortOrderForMyDay(newOrder: TaskSortOrder) {
-        _sortOrder.value = newOrder
-        loadMyDayTasks()
-    }
-
-    fun changeSortOrderForUnlisted(newOrder: TaskSortOrder) {
-        _sortOrder.value = newOrder
-        loadUnlistedTasks()
+    fun changeSortOrder(newOrder: TaskSortOrder) {
+        sortOrder.value = newOrder
     }
 
     fun completeTask(id: Int) {
         viewModelScope.launch {
             taskDao.updateTaskCompleted(id, LocalDateTime.now())
+            cancelReminder(id)
         }
     }
 
     fun reopenTask(id: Int) {
         viewModelScope.launch {
             taskDao.updateTaskReopen(id, LocalDateTime.now())
+            taskDao.getTaskById(id)?.let { scheduleReminderIfEnabled(it) }
         }
     }
 
-    fun loadListName(id: Int) {
+    private fun loadListName(id: Int) {
         viewModelScope.launch {
-            val name = taskDao.getListNameById(id)
-            _listName.value = name
+            _listName.value = taskDao.getListNameById(id)
         }
     }
-
 }

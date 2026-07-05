@@ -11,15 +11,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
@@ -47,23 +48,30 @@ fun AppBottomNavigation(navController: NavController, viewModel: HomeViewModel) 
     var showListDialog by rememberSaveable { mutableStateOf(false) }
     var newListName by rememberSaveable { mutableStateOf("") }
 
-    BottomNavigation {
-        BottomNavigationItem(
-            modifier = Modifier.background(color = colorScheme.primary),
+    val itemColors = NavigationBarItemDefaults.colors(
+        selectedIconColor = colorScheme.onPrimary,
+        selectedTextColor = colorScheme.onPrimary,
+        unselectedIconColor = colorScheme.onPrimary,
+        unselectedTextColor = colorScheme.onPrimary,
+        indicatorColor = colorScheme.secondary
+    )
+
+    NavigationBar(containerColor = colorScheme.primary) {
+        NavigationBarItem(
             icon = { Icon(imageVector = Icons.Default.Home, contentDescription = "Home Icon") },
             label = { Text("Home") },
             selected = false,
+            colors = itemColors,
             onClick = { navController.navigate(Destinations.HOME_ROUTE) }
         )
-        BottomNavigationItem(
-            modifier = Modifier.background(color = colorScheme.primary),
+        NavigationBarItem(
             icon = { Icon(imageVector = Icons.Default.Add, contentDescription = "Add New Icon") },
             label = { Text("Add New") },
             selected = true,
+            colors = itemColors,
             onClick = { showDialog = true }
         )
-        BottomNavigationItem(
-            modifier = Modifier.background(color = colorScheme.primary),
+        NavigationBarItem(
             icon = {
                 Icon(
                     imageVector = Icons.Default.Settings,
@@ -72,6 +80,7 @@ fun AppBottomNavigation(navController: NavController, viewModel: HomeViewModel) 
             },
             label = { Text("Settings") },
             selected = false,
+            colors = itemColors,
             onClick = { navController.navigate(Destinations.SETTINGS_ROUTE) }
         )
     }
@@ -168,7 +177,7 @@ fun AppBottomNavigation(navController: NavController, viewModel: HomeViewModel) 
                 Button(
                     onClick = { showDialog = false },
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = colorScheme.tertiary,
+                        containerColor = colorScheme.tertiary,
                         contentColor = colorScheme.onError
                     )
                 ) {
@@ -187,7 +196,7 @@ fun AppBottomNavigation(navController: NavController, viewModel: HomeViewModel) 
             text = {
                 Column {
                     OutlinedTextField(
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                        colors = OutlinedTextFieldDefaults.colors(
                             focusedBorderColor = colorScheme.primary,
                             focusedLabelColor = colorScheme.primary
                         ),
@@ -203,12 +212,9 @@ fun AppBottomNavigation(navController: NavController, viewModel: HomeViewModel) 
                         viewModel.addNewList(newListName)
                         newListName = ""
                         showListDialog = false
-                        if (navController.currentDestination?.route == Destinations.HOME_ROUTE) {
-                            navController.navigate(Destinations.HOME_ROUTE)
-                        }
                     },
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = colorScheme.primary,
+                        containerColor = colorScheme.primary,
                         contentColor = colorScheme.onPrimary
                     )
                 )
@@ -220,7 +226,7 @@ fun AppBottomNavigation(navController: NavController, viewModel: HomeViewModel) 
                 Button(
                     onClick = { showListDialog = false },
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = colorScheme.tertiary,
+                        containerColor = colorScheme.tertiary,
                         contentColor = colorScheme.onError
                     )
                 ) {

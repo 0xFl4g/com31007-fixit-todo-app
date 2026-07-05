@@ -8,8 +8,8 @@ A feature-rich task management app built with Kotlin and Jetpack Compose, follow
 - **Task Lists** -- Organise tasks into named lists with sorting by name, creation date, or last updated
 - **My Day** -- Quick view of tasks due today
 - **Template Tasks** -- Save and reuse task templates for recurring work
-- **Geolocation** -- Tag tasks with GPS coordinates and see distance from your current location
-- **Notifications** -- Scheduled reminders via AlarmManager with broadcast receiver
+- **Geolocation** -- Tag tasks with GPS coordinates, see distance from your current location, and get notified when you're near a task's location
+- **Notifications** -- Scheduled reminders via AlarmManager with broadcast receiver, re-scheduled automatically after reboot
 - **Settings** -- Toggle notification preferences and manage app data
 - **Theming** -- Material Design 3 with dynamic colour support (Android 12+), light and dark modes
 
@@ -69,6 +69,9 @@ cd com31007-fixit-todo-app
 
 # Install on a connected device/emulator
 ./gradlew installDebug
+
+# Run the unit tests
+./gradlew testDebugUnitTest
 ```
 
 Or open the project in Android Studio and run it directly.
@@ -93,6 +96,7 @@ The database is pre-seeded with default notification settings and 5 sample templ
 | `ACCESS_FINE_LOCATION` | GPS-based task location tagging |
 | `ACCESS_COARSE_LOCATION` | Network-based location fallback |
 | `POST_NOTIFICATIONS` | Display reminder notifications (Android 13+) |
+| `RECEIVE_BOOT_COMPLETED` | Re-schedule reminder alarms after a reboot |
 | `SCHEDULE_EXACT_ALARM` | Schedule precise reminder alarms |
 
 ## License

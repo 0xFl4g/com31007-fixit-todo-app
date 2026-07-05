@@ -9,15 +9,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Switch
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -39,10 +41,11 @@ import group.project.fixitapp.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsTopBar() {
     TopAppBar(
-        backgroundColor = colorScheme.primary,
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = colorScheme.primary),
         title = { Text("Settings", color = colorScheme.onPrimary) },
         navigationIcon = {
             Icon(
@@ -70,7 +73,7 @@ fun SettingsContent(viewModel: SettingsViewModel) {
         Row(modifier = Modifier.padding(MediumPadding)) {
             Text(text = "Notifications", fontSize = 20.sp)
         }
-        Divider(color = Color.Black)
+        HorizontalDivider(color = Color.Black)
         Spacer(modifier = Modifier.height(SmallPadding))
 
         // Notification for due reminder tasks
@@ -127,7 +130,7 @@ fun SettingsContent(viewModel: SettingsViewModel) {
         ) {
             Button(
                 onClick = { showWarning = true }, colors = ButtonDefaults.buttonColors(
-                    backgroundColor = colorScheme.secondary, contentColor = colorScheme.onSecondary
+                    containerColor = colorScheme.secondary, contentColor = colorScheme.onSecondary
                 )
             ) {
                 Text(text = "Reset Data")
@@ -147,7 +150,7 @@ fun SettingsContent(viewModel: SettingsViewModel) {
                     }
                 },
                 onDismissRequest = { showWarning = false },
-                buttons = {
+                confirmButton = {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -157,7 +160,7 @@ fun SettingsContent(viewModel: SettingsViewModel) {
                         Button(
                             onClick = { showWarning = false },
                             colors = ButtonDefaults.buttonColors(
-                                backgroundColor = colorScheme.tertiary,
+                                containerColor = colorScheme.tertiary,
                                 contentColor = colorScheme.onError
                             )
                         ) {
@@ -168,7 +171,7 @@ fun SettingsContent(viewModel: SettingsViewModel) {
                                 viewModel.deleteEverything(); showWarning = false
                             },
                             colors = ButtonDefaults.buttonColors(
-                                backgroundColor = colorScheme.error,
+                                containerColor = colorScheme.error,
                                 contentColor = colorScheme.onError
                             )
                         ) {

@@ -8,29 +8,37 @@ import group.project.fixitapp.data.AppDatabase
 import group.project.fixitapp.data.entities.TaskEntity
 import group.project.fixitapp.data.entities.TemplateEntity
 import group.project.fixitapp.services.GeoLocationService
+import group.project.fixitapp.utils.cleanupTaskArtifacts
+import group.project.fixitapp.utils.haversineDistanceMetres
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
-import kotlin.math.pow
-import kotlin.math.sqrt
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ViewTaskViewModel(app: Application) : TaskViewModel(app) {
-    private val templateDao = AppDatabase.getDatabase(app).templateDAO() // Add this line
+    private val templateDao = AppDatabase.getDatabase(app).templateDAO()
 
-    private val _task = MutableStateFlow<TaskEntity?>(null)
-    val task: StateFlow<TaskEntity?> get() = _task.asStateFlow()
+    private val taskId = MutableStateFlow<Int?>(null)
 
-    fun loadTaskById(taskId: Int) {
-        viewModelScope.launch {
-            _task.value = taskDao.getTaskById(taskId)
-        }
+    val task: StateFlow<TaskEntity?> = taskId
+        .filterNotNull()
+        .flatMapLatest { taskDao.observeTaskById(it) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    fun loadTaskById(id: Int) {
+        taskId.value = id
     }
 
     fun deleteTask(id: Int, navController: NavController) {
         viewModelScope.launch {
             val task = taskDao.getTaskById(id) ?: return@launch
+            cleanupTaskArtifacts(getApplication(), task)
             taskDao.deleteTask(task)
             if (task.listId == null) {
                 navController.navigate(Destinations.TASK_LIST_UNLISTED_ROUTE)
@@ -45,32 +53,25 @@ class ViewTaskViewModel(app: Application) : TaskViewModel(app) {
         }
     }
 
-    fun distanceFromLocation(taskLat: Double, taskLong: Double): Float {
-
+    fun distanceFromLocation(taskLat: Double, taskLong: Double): Float? {
         GeoLocationService.locationViewModel?.fetchLocation()
-        val currentLat = GeoLocationService.locationViewModel?.latitude
-        val currentLong = GeoLocationService.locationViewModel?.longitude
+        val currentLat = GeoLocationService.locationViewModel?.latitude ?: return null
+        val currentLong = GeoLocationService.locationViewModel?.longitude ?: return null
 
-        var distance = 0f
-
-        if (currentLat != null && currentLong != null) {
-            distance =
-                ((currentLat.toFloat() - taskLat.toFloat()).pow(2) + (currentLong.toFloat() - taskLong.toFloat()).pow(
-                    2
-                ))
-        }
-        return sqrt(distance * 11139)
+        return haversineDistanceMetres(currentLat, currentLong, taskLat, taskLong)
     }
 
     fun completeTask(id: Int) {
         viewModelScope.launch {
             taskDao.updateTaskCompleted(id, LocalDateTime.now())
+            cancelReminder(id)
         }
     }
 
     fun reopenTask(id: Int) {
         viewModelScope.launch {
             taskDao.updateTaskReopen(id, LocalDateTime.now())
+            taskDao.getTaskById(id)?.let { scheduleReminderIfEnabled(it) }
         }
     }
 

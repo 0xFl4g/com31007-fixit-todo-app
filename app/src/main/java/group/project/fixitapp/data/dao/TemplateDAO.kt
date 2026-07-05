@@ -4,23 +4,20 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Update
 import group.project.fixitapp.data.entities.TemplateEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TemplateDAO {
     @Insert
     suspend fun insertTemplate(template: TemplateEntity)
 
-    @Update
-    suspend fun updateTemplate(template: TemplateEntity)
-
     @Delete
     suspend fun deleteTemplate(template: TemplateEntity)
 
     @Query("SELECT * FROM template_task")
-    suspend fun getAllTemplates(): List<TemplateEntity>
+    fun observeAllTemplates(): Flow<List<TemplateEntity>>
 
     @Query("SELECT * FROM template_task WHERE id = :id")
-    suspend fun getTemplateById(id: Int): TemplateEntity
+    fun observeTemplateById(id: Int): Flow<TemplateEntity?>
 }

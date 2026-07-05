@@ -48,6 +48,8 @@ class NewTaskViewModel(app: Application) : TaskViewModel(app) {
                 taskDao.updateTask(updatedTask)
             }
 
+            scheduleReminderIfEnabled(newTask.copy(id = taskId))
+
             // redirect user to the task list page unlisted or specific depending on the list id
             if (listId == null) {
                 navController.navigate(Destinations.TASK_LIST_UNLISTED_ROUTE)
