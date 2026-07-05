@@ -24,7 +24,8 @@ group.project.fixitapp/
 │   └── Converters.kt    # LocalDateTime type converters
 ├── services/
 │   ├── GeoLocationService.kt      # Location tracking singleton
-│   └── NotificationReceiver.kt    # Broadcast receiver for scheduled notifications
+│   ├── NotificationReceiver.kt    # Broadcast receiver for scheduled notifications
+│   └── BootReceiver.kt            # Re-schedules reminders after device reboot
 ├── utils/
 │   └── NotificationUtils.kt       # Notification channel, scheduling, and display helpers
 ├── ui/
