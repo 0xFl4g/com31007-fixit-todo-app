@@ -29,13 +29,13 @@ fun TemplateTaskListScreen(viewModel: TemplateTaskListViewModel, navController: 
     Scaffold(
         topBar = { HomeTopBar() }
     ) { contentPadding ->
-        Column {
+        Column(modifier = Modifier.padding(contentPadding)) {
             Text(
                 text = "Choose a Template Task: ",
                 fontSize = 20.sp,
                 modifier = Modifier.padding(MediumPadding)
             )
-            LazyColumn(contentPadding = contentPadding) {
+            LazyColumn {
                 items(templateTasks) { templateTask ->
                     TemplateTaskItem(
                         templateTask = templateTask,

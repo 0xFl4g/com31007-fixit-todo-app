@@ -2,6 +2,7 @@ package group.project.fixitapp.ui.pages
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -61,13 +62,14 @@ fun SettingsTopBar() {
 }
 
 @Composable
-fun SettingsContent(viewModel: SettingsViewModel) {
+fun SettingsContent(viewModel: SettingsViewModel, contentPadding: PaddingValues) {
     val coroutineScope = rememberCoroutineScope()
     var showWarning by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(contentPadding)
             .padding(start = MediumPadding, end = MediumPadding, top = MediumPadding)
     ) {
         Row(modifier = Modifier.padding(MediumPadding)) {
@@ -188,8 +190,8 @@ fun SettingsContent(viewModel: SettingsViewModel) {
 fun SettingsScreen() {
     Scaffold(
         topBar = { SettingsTopBar() }
-    ) { _ ->
-        SettingsContent(viewModel<SettingsViewModel>())
+    ) { innerPadding ->
+        SettingsContent(viewModel<SettingsViewModel>(), innerPadding)
     }
 }
 

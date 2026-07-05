@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -43,7 +44,14 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MainApp() {
         val navController = rememberNavController()
-        Scaffold(bottomBar = { AppBottomNavigation(navController, viewModel()) }) { innerPadding ->
+        // Each screen's own Scaffold/TopAppBar consumes the top status-bar inset, so
+        // this outer Scaffold must not consume it too (nested Scaffolds would otherwise
+        // double-apply it, leaving a white gap above the app bar). It still positions
+        // content above the bottom navigation bar via innerPadding.
+        Scaffold(
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
+            bottomBar = { AppBottomNavigation(navController, viewModel()) }
+        ) { innerPadding ->
             AppNavHost(navController, Modifier.padding(innerPadding))
         }
     }

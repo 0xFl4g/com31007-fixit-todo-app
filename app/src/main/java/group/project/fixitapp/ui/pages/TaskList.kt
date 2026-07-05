@@ -90,16 +90,14 @@ fun TaskListScreen(
             )
         }
     ) { paddingValues ->
-        Column {
+        Column(modifier = Modifier.padding(paddingValues)) {
             Text(
                 text = "List: $listName",
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.padding(MediumPadding)
             )
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
+                modifier = Modifier.fillMaxSize()
             ) {
                 items(sortedIfCompletedTasks) { task ->
                     TaskItem(
