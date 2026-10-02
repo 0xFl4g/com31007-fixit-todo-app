@@ -77,3 +77,16 @@ jobs:
         with:
           persist-credentials: false
       - uses: google/osv-scanner-action/osv-scanner-action@a345acffa64b0eaede81a3d9aae6141214d9c8fc # v2.6.0
+      - name: UTP lockfile guard (osv ignores are only valid for UTP-internal netty/protobuf/grpc)
+        run: |
+          # lockfile line: group:artifact:version=conf1,conf2,...  Fail if a netty|protobuf|grpc
+          # dependency is in any configuration not starting with _internal-unified-test-platform.
+          awk -F= '
+            !/^#/ && $1 ~ /netty|protobuf|grpc/ {
+              n = split($2, confs, ",")
+              for (i = 1; i <= n; i++)
+                if (confs[i] !~ /^_internal-unified-test-platform/) {
+                  print "non-UTP config " confs[i] ": " $1; bad = 1
+                }
+            }
+            END { exit bad }' app/gradle.lockfile

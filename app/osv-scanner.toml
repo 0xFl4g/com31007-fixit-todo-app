@@ -1,3 +1,6 @@
+# SCOPE: these ignores are global by ID, so they are valid ONLY while netty/protobuf/grpc are AGP
+# unified-test-platform (UTP) internals. The "UTP lockfile guard" step in .github/workflows/security.yml
+# fails CI if any of them appears in a non-UTP configuration of app/gradle.lockfile; if it does, drop these ignores.
 # All findings are netty/protobuf pulled by AGP-internal _internal-unified-test-platform-* configurations
 # (managed-device test tooling, not shipped in the APK, not run here). Fix = AGP 9 (deferred major, needs compileSdk 37).
 # Review by 2026-12-31 or when AGP 9 is adopted.
