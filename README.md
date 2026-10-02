@@ -77,6 +77,15 @@ cd com31007-fixit-todo-app
 
 Or open the project in Android Studio and run it directly.
 
+### Dependency locking and Dependabot
+
+Dependencies are locked in `app/gradle.lockfile`; Dependabot's gradle updater must update it along with the
+build files. If a Dependabot PR leaves the lockfile unchanged, regenerate it with:
+
+```bash
+./gradlew :app:dependencies --write-locks
+```
+
 ## Database
 
 Room with 4 tables:
