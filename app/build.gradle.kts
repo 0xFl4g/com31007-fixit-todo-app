@@ -55,7 +55,7 @@ android {
 
 dependencies {
     val roomVersion = "2.8.5"
-    val activityVersion = "1.10.1"
+    val activityVersion = "1.13.0"
     val lifecycleVersion = "2.9.4"
 
     implementation("androidx.activity:activity:$activityVersion")
